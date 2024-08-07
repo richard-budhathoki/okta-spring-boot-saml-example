@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -46,6 +47,11 @@ public class SecurityConfiguration {
             Saml2Authentication authentication = delegate.convert(responseToken);
             Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
             List<String> groups = principal.getAttribute("groups");
+
+            if (groups == null) {
+                groups = principal.getAttribute("http://schemas.auth0.com/roles");
+            }
+
             Set<GrantedAuthority> authorities = new HashSet<>();
             if (groups != null) {
                 groups.stream().map(SimpleGrantedAuthority::new).forEach(authorities::add);
